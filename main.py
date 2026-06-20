@@ -1,6 +1,8 @@
+import os
 import asyncio
 from flask import Flask, request as flask_request
 from aiogram import Bot
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.types import Update
 
 from bot.main import dp
@@ -34,9 +36,13 @@ def flask_webhook():
     try:
         data = flask_request.get_json(force=True)
         update = Update(**data)
-        
+
         async def process_update():
-            local_bot = Bot(token=config.token)
+            # Check for proxy configuration (required on PythonAnywhere Free Tier)
+            proxy = os.getenv("http_proxy") or os.getenv("https_proxy")
+            session = AiohttpSession(proxy=proxy) if proxy else None
+
+            local_bot = Bot(token=config.token, session=session)
             try:
                 await dp.feed_update(local_bot, update)
             finally:
@@ -44,7 +50,7 @@ def flask_webhook():
 
         asyncio.run(process_update())
         return "OK", 200
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
         return "Error", 500
