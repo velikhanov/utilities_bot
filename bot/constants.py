@@ -6,9 +6,26 @@ from typing import Dict
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+# --- Spreadsheet Structure Constants ---
+COL_TYPE = "type"
+COL_AMOUNT = "amount"
+COL_TOTAL = "total"
+COL_DESCRIPTION = "description"
+COL_CREATED_AT = "created_at"
+
+HEADERS = [COL_TYPE, COL_AMOUNT, COL_TOTAL, COL_DESCRIPTION, COL_CREATED_AT]
+
+COL_LETTER_AMOUNT = "B"  # Column 2
+COL_LETTER_TOTAL = "C"   # Column 3
+
+NEW_SHEET_ROWS = "1000"
+NEW_SHEET_COLS = "10"
+# ----------------------------------------
+
 
 @dataclass
 class User:
+
     username: str
     role: str
 
