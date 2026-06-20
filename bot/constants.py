@@ -1,8 +1,10 @@
+import os
+import json
 from enum import Enum
 from dataclasses import dataclass
 from typing import Dict
 
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 @dataclass
@@ -21,55 +23,68 @@ class UserRole(Enum):
     READER = "reader"
 
 
-# User management
-ALLOWED_USERS: Dict[int, User] = {
-    1680055119: User("teymur_15", UserRole.EDITOR.value),
-    1320049768: User("Ya_Anto_Nina", UserRole.EDITOR.value),
-    5901547055: User("Kenan", UserRole.READER.value)
-}
+# User management (loaded dynamically from environment variable JSON string)
+
+def get_allowed_users() -> Dict[int, User]:
+    raw_users = os.getenv("ALLOWED_USERS", "{}")
+    try:
+        data = json.loads(raw_users)
+        return {
+            int(user_id): User(username=info["username"], role=info["role"]) 
+            for user_id, info in data.items()
+        }
+    except Exception as e:
+        print(f"Error parsing ALLOWED_USERS env variable: {e}")
+        return {}
+
+
+def has_access(user_id: int) -> bool:
+    return user_id in get_allowed_users()
+
+
+def is_editor(user_id: int) -> bool:
+    users = get_allowed_users()
+    return user_id in users and users[user_id].role == UserRole.EDITOR.value
+
 
 
 # Keyboard factory
 class KeyboardFactory:
     @staticmethod
-    def create_role_keyboard(role: str) -> ReplyKeyboardMarkup:
+    def create_role_keyboard(role: str) -> InlineKeyboardMarkup:
         if role == UserRole.EDITOR.value:
-            return ReplyKeyboardMarkup(
-                keyboard=[
-                    [KeyboardButton(text="💰 Общая сумма")],
-                    [KeyboardButton(text="💵 Добавить Приход"),
-                     KeyboardButton(text="💸 Добавить Расход")],
-                    [KeyboardButton(text="📊 Статистика")]
-                ],
-                resize_keyboard=True,
-                one_time_keyboard=False
+            return InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="💰 Общая сумма", callback_data="action:total")],
+                    [InlineKeyboardButton(text="💵 Добавить Приход", callback_data="action:income"),
+                     InlineKeyboardButton(text="💸 Добавить Расход", callback_data="action:expense")],
+                    [InlineKeyboardButton(text="📊 Статистика", callback_data="action:stats_menu")]
+                ]
             )
         else:
-            return ReplyKeyboardMarkup(
-                keyboard=[[KeyboardButton(text="📊 Общая сумма")]],
-                resize_keyboard=True,
-                one_time_keyboard=False
+            return InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="💰 Общая сумма", callback_data="action:total")]
+                ]
             )
 
     @staticmethod
-    def create_transaction_keyboard() -> ReplyKeyboardMarkup:
-        return ReplyKeyboardMarkup(
-            keyboard=[[KeyboardButton(text="❌ Отменить")]],
-            resize_keyboard=True,
-            one_time_keyboard=True
+    def create_transaction_keyboard() -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="❌ Отменить", callback_data="action:cancel")]
+            ]
         )
 
     @staticmethod
-    def create_statistics_type_keyboard() -> ReplyKeyboardMarkup:
-        return ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="📅 Текущий месяц"),
-                 KeyboardButton(text="⏮ Прошлый месяц")],
-                [KeyboardButton(text="✏️ Ввести свой месяц")],
-                [KeyboardButton(text="❌ Отменить")]
-            ],
-            resize_keyboard=True,
-            one_time_keyboard=True
+    def create_statistics_type_keyboard() -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="📅 Текущий месяц", callback_data="stats:current"),
+                 InlineKeyboardButton(text="⏮ Прошлый месяц", callback_data="stats:previous")],
+                [InlineKeyboardButton(text="✏️ Ввести свой месяц", callback_data="stats:custom")],
+                [InlineKeyboardButton(text="❌ Отменить", callback_data="action:cancel")]
+            ]
         )
 
 
@@ -81,14 +96,4 @@ ROLE_TO_KEYBOARD = {
 TRANSACTION_IN_PROGRESS_KEYBORD = KeyboardFactory.create_transaction_keyboard()
 STATISTICS_TYPE_KEYBOARD = KeyboardFactory.create_statistics_type_keyboard()
 
-# Allowed actions
-ALLOWED_BUTTONS = [
-    "💰 Общая сумма",
-    "💵 Добавить Приход",
-    "💸 Добавить Расход",
-    "📊 Статистика"
-    "📅 Текущий месяц",
-    "⏮ Прошлый месяц",
-    "✏️ Ввести месяц"
-]
-ALLOWED_COMMANDS = ["/start", "/clear"]
+ALLOWED_COMMANDS = ["/start"]
