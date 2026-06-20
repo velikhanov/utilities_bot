@@ -2,7 +2,6 @@ import os
 import json
 from enum import Enum
 from dataclasses import dataclass
-from typing import Dict
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -41,8 +40,7 @@ class UserRole(Enum):
 
 
 # User management (loaded dynamically from environment variable JSON string)
-
-def get_allowed_users() -> Dict[int, User]:
+def get_allowed_users() -> dict[int, User]:
     raw_users = os.getenv("ALLOWED_USERS", "{}")
     try:
         data = json.loads(raw_users)
@@ -62,7 +60,6 @@ def has_access(user_id: int) -> bool:
 def is_editor(user_id: int) -> bool:
     users = get_allowed_users()
     return user_id in users and users[user_id].role == UserRole.EDITOR.value
-
 
 
 # Keyboard factory
