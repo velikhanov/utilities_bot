@@ -33,4 +33,6 @@ def flask_webhook():
         asyncio.run(dp.feed_update(bot, update))
         return "OK", 200
     except Exception:
+        import traceback
+        traceback.print_exc()
         return "Error", 500
