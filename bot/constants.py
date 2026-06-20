@@ -3,7 +3,7 @@ import json
 from enum import Enum
 from dataclasses import dataclass
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # --- Spreadsheet Structure Constants ---
 COL_TYPE = "type"
@@ -24,7 +24,6 @@ NEW_SHEET_COLS = "10"
 
 @dataclass
 class User:
-
     username: str
     role: str
 
@@ -65,40 +64,44 @@ def is_editor(user_id: int) -> bool:
 # Keyboard factory
 class KeyboardFactory:
     @staticmethod
-    def create_role_keyboard(role: str) -> InlineKeyboardMarkup:
+    def create_role_keyboard(role: str) -> ReplyKeyboardMarkup:
         if role == UserRole.EDITOR.value:
-            return InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="💰 Общая сумма", callback_data="action:total")],
-                    [InlineKeyboardButton(text="💵 Добавить Приход", callback_data="action:income"),
-                     InlineKeyboardButton(text="💸 Добавить Расход", callback_data="action:expense")],
-                    [InlineKeyboardButton(text="📊 Статистика", callback_data="action:stats_menu")]
-                ]
+            return ReplyKeyboardMarkup(
+                keyboard=[
+                    [KeyboardButton(text="💰 Общая сумма")],
+                    [KeyboardButton(text="💵 Добавить Приход"),
+                     KeyboardButton(text="💸 Добавить Расход")],
+                    [KeyboardButton(text="📊 Статистика")]
+                ],
+                resize_keyboard=True,
+                one_time_keyboard=False
             )
         else:
-            return InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="💰 Общая сумма", callback_data="action:total")]
-                ]
+            return ReplyKeyboardMarkup(
+                keyboard=[[KeyboardButton(text="💰 Общая сумма")]],
+                resize_keyboard=True,
+                one_time_keyboard=False
             )
 
     @staticmethod
-    def create_transaction_keyboard() -> InlineKeyboardMarkup:
-        return InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="❌ Отменить", callback_data="action:cancel")]
-            ]
+    def create_transaction_keyboard() -> ReplyKeyboardMarkup:
+        return ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="❌ Отменить")]],
+            resize_keyboard=True,
+            one_time_keyboard=True
         )
 
     @staticmethod
-    def create_statistics_type_keyboard() -> InlineKeyboardMarkup:
-        return InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="📅 Текущий месяц", callback_data="stats:current"),
-                 InlineKeyboardButton(text="⏮ Прошлый месяц", callback_data="stats:previous")],
-                [InlineKeyboardButton(text="✏️ Ввести свой месяц", callback_data="stats:custom")],
-                [InlineKeyboardButton(text="❌ Отменить", callback_data="action:cancel")]
-            ]
+    def create_statistics_type_keyboard() -> ReplyKeyboardMarkup:
+        return ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="📅 Текущий месяц"),
+                 KeyboardButton(text="⏮ Прошлый месяц")],
+                [KeyboardButton(text="✏️ Ввести свой месяц")],
+                [KeyboardButton(text="❌ Отменить")]
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True
         )
 
 
@@ -109,5 +112,16 @@ ROLE_TO_KEYBOARD = {
 }
 TRANSACTION_IN_PROGRESS_KEYBORD = KeyboardFactory.create_transaction_keyboard()
 STATISTICS_TYPE_KEYBOARD = KeyboardFactory.create_statistics_type_keyboard()
+
+ALLOWED_BUTTONS = [
+    "💰 Общая сумма",
+    "💵 Добавить Приход",
+    "💸 Добавить Расход",
+    "📊 Статистика",
+    "📅 Текущий месяц",
+    "⏮ Прошлый месяц",
+    "✏️ Ввести свой месяц",
+    "❌ Отменить"
+]
 
 ALLOWED_COMMANDS = ["/start"]
