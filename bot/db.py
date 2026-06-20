@@ -59,6 +59,7 @@ def get_monthly_sheet():
             # Clear caches on connection/API error to force re-fetch next time
             if _spreadsheet is not None:
                 _spreadsheet = None
+
             _current_sheet = None
             raise
 
