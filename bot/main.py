@@ -1,18 +1,9 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Dispatcher
 
-from bot.config import BotConfig
 from bot.handlers import start, cancel, statistics, total, income, expense, filter
 
-# Load configuration
-config = BotConfig.from_env()
-
-if not config.validate():
-    print("Invalid configuration! Please check your environment variables.")
-    raise ValueError("Missing required configuration")
-
-# Initialize bot and dispatcher
+# Initialize dispatcher
 dp = Dispatcher()
-bot = Bot(token=config.token)
 
 # Include routers
 dp.include_router(start.router)
