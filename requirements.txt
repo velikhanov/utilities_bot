@@ -3,3 +3,4 @@ aiogram==3.22.0
 dotenv==0.9.9
 google-auth==2.40.3
 gspread==6.2.1
+aiohttp-socks==0.11.0
