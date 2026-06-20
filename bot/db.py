@@ -8,12 +8,20 @@ from bot.config import BotConfig
 from bot.constants import TransactionType
 
 config = BotConfig.from_env()
-creds = Credentials.from_service_account_info(json.loads(config.google_creds), scopes=config.scopes)
-client = gspread.authorize(creds)
+_client = None
+
+
+def get_client():
+    global _client
+    if _client is None:
+        creds = Credentials.from_service_account_info(json.loads(config.google_creds), scopes=config.scopes)
+        _client = gspread.authorize(creds)
+    return _client
 
 
 def get_monthly_sheet():
     month_name = datetime.now().strftime("%m-%Y")
+    client = get_client()
     try:
         sheet = client.open(config.sheet_name).worksheet(month_name)
     except gspread.exceptions.WorksheetNotFound:
@@ -34,6 +42,7 @@ def get_records_from_previous_month() -> int:
         month -= 1
 
     prev_sheet_name = f"{month:02d}-{year}"
+    client = get_client()
     try:
         prev_sheet = client.open(config.sheet_name).worksheet(prev_sheet_name)
         return prev_sheet.get_all_records()
@@ -73,6 +82,7 @@ def add_transaction(amount, transaction_type, description=None) -> int:
 
 
 def get_expenses_stats(monthly_sheet_name: str) -> str:
+    client = get_client()
     try:
         sheet = client.open(config.sheet_name).worksheet(monthly_sheet_name)
         return "\n".join(

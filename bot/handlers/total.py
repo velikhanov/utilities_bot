@@ -1,5 +1,5 @@
 from aiogram import F
-from aiogram.types import Message
+from aiogram.types import CallbackQuery
 
 from bot.handlers.base import BaseHandler
 from bot.db import get_total
@@ -7,11 +7,11 @@ from bot.db import get_total
 
 class TotalHandler(BaseHandler):
     def _register_handlers(self):
-        self.router.message(F.text == "💰 Общая сумма")(self.show_total)
+        self.router.callback_query(F.data == "action:total")(self.show_total)
 
-    async def show_total(self, message: Message):
+    async def show_total(self, callback: CallbackQuery):
         total = get_total()
-        await message.answer(f"💰 Общая сумма в казне: {total} AZN")
+        await self._show_role_keyboard(callback, text=f"💰 Общая сумма в казне: {total} AZN")
 
 
 # Create router instance
