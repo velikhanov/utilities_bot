@@ -26,6 +26,20 @@ def flask_home():
     return "OK", 200
 
 
+@flask_app.route("/robots.txt", methods=["GET"])
+def robots_txt():
+    # Disallow all bots/crawlers from scanning this private webhook server
+    return "User-agent: *\nDisallow: /\n", 200, {"Content-Type": "text/plain"}
+
+
+@flask_app.route("/favicon.ico", methods=["GET"])
+@flask_app.route("/apple-touch-icon.png", methods=["GET"])
+@flask_app.route("/apple-touch-icon-precomposed.png", methods=["GET"])
+def favicon():
+    # Send a clean '204 No Content' response for favicon/icon requests to avoid 404 logs
+    return "", 204
+
+
 @flask_app.route("/webhook", methods=["POST"])
 def flask_webhook():
     # Verify the secret token header to ensure updates come from Telegram
