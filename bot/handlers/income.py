@@ -32,11 +32,12 @@ class IncomeHandler(BaseHandler):
             return
 
         data = await state.get_data()
+        await state.clear()
+
         total = add_transaction(amount, data["transaction_type"])
 
         await message.answer(f"💵 Приход на сумму {amount} AZN успешно добавлен!")
         await message.answer(f"💰 Общая сумма в казне: {total} AZN")
-        await state.clear()
         await self._show_role_keyboard(message)
 
 

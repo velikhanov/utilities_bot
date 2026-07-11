@@ -51,11 +51,12 @@ class ExpenseHandler(BaseHandler):
         amount = data["amount"]
         description = message.text
 
+        await state.clear()
+
         total = add_transaction(amount, data["transaction_type"], description)
 
         await message.answer(f"💸 Расход на сумму {amount} AZN успешно добавлен!\n✏️ Описание: {description}")
         await message.answer(f"💰 Общая сумма в казне: {total} AZN")
-        await state.clear()
         await self._show_role_keyboard(message)
 
 
