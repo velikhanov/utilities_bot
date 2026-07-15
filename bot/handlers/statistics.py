@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
 from aiogram import F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -7,6 +8,8 @@ from bot.constants import STATISTICS_TYPE_KEYBOARD
 from bot.handlers.base import BaseHandler
 from bot.db import get_expenses_stats
 from bot.states.statistics import CustomMonthState
+
+BAKU_TZ = timezone(timedelta(hours=4))
 
 
 class StatsHandler(BaseHandler):
@@ -27,7 +30,7 @@ class StatsHandler(BaseHandler):
         if not await self._check_user_access(message):
             return
 
-        now = datetime.now()
+        now = datetime.now(BAKU_TZ)
         sheet_name = f"{now.month:02d}-{now.year}"
         stats = get_expenses_stats(sheet_name)
 
@@ -42,7 +45,7 @@ class StatsHandler(BaseHandler):
         if not await self._check_user_access(message):
             return
 
-        now = datetime.now()
+        now = datetime.now(BAKU_TZ)
         prev_month = now.month - 1 if now.month > 1 else 12
         prev_year = now.year if now.month > 1 else now.year - 1
         sheet_name = f"{prev_month:02d}-{prev_year}"
