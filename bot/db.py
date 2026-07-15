@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -8,10 +8,8 @@ from bot.config import BotConfig
 from bot.constants import (
     TransactionType, COL_TYPE, COL_AMOUNT, COL_TOTAL,
     COL_DESCRIPTION, HEADERS, COL_LETTER_AMOUNT, COL_LETTER_TOTAL,
-    NEW_SHEET_ROWS, NEW_SHEET_COLS
+    NEW_SHEET_ROWS, NEW_SHEET_COLS, BAKU_TZ
 )
-
-BAKU_TZ = timezone(timedelta(hours=4))
 
 config = BotConfig.from_env()
 _client = None
@@ -172,11 +170,11 @@ def get_month_stats_summary(monthly_sheet_name: str, filter_type: str) -> str:
             amount = abs(row[COL_AMOUNT])
             if t_type == TransactionType.INCOME:
                 total_income += amount
-                if filter_type in ["income", "all"]:
+                if filter_type in ("income", "all"):
                     lines.append(f'💵 Приход: {amount:<5} AZN | 💰 Остаток: {row[COL_TOTAL]:<5} AZN | 📌 {row[COL_DESCRIPTION] or "-"}')
             elif t_type == TransactionType.EXPENSE:
                 total_expense += amount
-                if filter_type in ["expense", "all"]:
+                if filter_type in ("expense", "all"):
                     lines.append(f'💸 Расход: {amount:<5} AZN | 💰 Остаток: {row[COL_TOTAL]:<5} AZN | 📌 {row[COL_DESCRIPTION] or "-"}')
 
         balance = total_income - total_expense

@@ -64,3 +64,22 @@ class BaseHandler(ABC):
             return users[message.from_user.id].role
 
         return "reader"
+
+    async def _send_long_message(self, message: Message, text: str, parse_mode: str = None):
+        """Send a long message by chunking it if it exceeds Telegram limits"""
+        MAX_MESSAGE_LENGTH = 4000
+
+        if len(text) <= MAX_MESSAGE_LENGTH:
+            await message.answer(text, parse_mode=parse_mode)
+            return
+
+        current_chunk = ""
+        for line in text.split('\n'):
+            if len(current_chunk) + len(line) + 1 > MAX_MESSAGE_LENGTH:
+                await message.answer(current_chunk, parse_mode=parse_mode)
+                current_chunk = line + "\n"
+            else:
+                current_chunk += line + "\n"
+
+        if current_chunk.strip():
+            await message.answer(current_chunk, parse_mode=parse_mode)
