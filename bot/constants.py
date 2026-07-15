@@ -104,6 +104,19 @@ class KeyboardFactory:
             one_time_keyboard=True
         )
 
+    @staticmethod
+    def create_statistics_filter_keyboard() -> ReplyKeyboardMarkup:
+        return ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="💸 Только Расходы"),
+                 KeyboardButton(text="💵 Только Приходы")],
+                [KeyboardButton(text="📋 Всё вместе")],
+                [KeyboardButton(text="❌ Отменить")]
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+
 
 # Pre-built keyboards
 ROLE_TO_KEYBOARD = {
@@ -112,6 +125,7 @@ ROLE_TO_KEYBOARD = {
 }
 TRANSACTION_IN_PROGRESS_KEYBORD = KeyboardFactory.create_transaction_keyboard()
 STATISTICS_TYPE_KEYBOARD = KeyboardFactory.create_statistics_type_keyboard()
+STATISTICS_FILTER_KEYBOARD = KeyboardFactory.create_statistics_filter_keyboard()
 
 ALLOWED_BUTTONS = [
     "💰 Общая сумма",
@@ -121,6 +135,9 @@ ALLOWED_BUTTONS = [
     "📅 Текущий месяц",
     "⏮ Прошлый месяц",
     "✏️ Ввести свой месяц",
+    "💸 Только Расходы",
+    "💵 Только Приходы",
+    "📋 Всё вместе",
     "❌ Отменить"
 ]
 

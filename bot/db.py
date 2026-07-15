@@ -157,15 +157,40 @@ def add_transaction(amount, transaction_type, description=None) -> int:
     return prev_total + amount
 
 
-def get_expenses_stats(monthly_sheet_name: str) -> str:
+def get_month_stats_summary(monthly_sheet_name: str, filter_type: str) -> str:
     try:
         doc = get_spreadsheet()
         sheet = doc.worksheet(monthly_sheet_name)
-        return "\n".join(
-            f'💸 Расход: {abs(row[COL_AMOUNT]):<5} AZN | 💰 Остаток: {row[COL_TOTAL]:<5} AZN | 📌 {row[COL_DESCRIPTION] or "-"}'
-            for row in sheet.get_all_records()
-            if TransactionType(row[COL_TYPE]) == TransactionType.EXPENSE
+        records = sheet.get_all_records()
+
+        total_income = 0
+        total_expense = 0
+        lines = []
+
+        for row in records:
+            t_type = TransactionType(row[COL_TYPE])
+            amount = abs(row[COL_AMOUNT])
+            if t_type == TransactionType.INCOME:
+                total_income += amount
+                if filter_type in ["income", "all"]:
+                    lines.append(f'💵 Приход: {amount:<5} AZN | 💰 Остаток: {row[COL_TOTAL]:<5} AZN | 📌 {row[COL_DESCRIPTION] or "-"}')
+            elif t_type == TransactionType.EXPENSE:
+                total_expense += amount
+                if filter_type in ["expense", "all"]:
+                    lines.append(f'💸 Расход: {amount:<5} AZN | 💰 Остаток: {row[COL_TOTAL]:<5} AZN | 📌 {row[COL_DESCRIPTION] or "-"}')
+
+        balance = total_income - total_expense
+        balance_str = f"+{balance}" if balance > 0 else str(balance)
+
+        header = (
+            f"📊 **Итоги за {monthly_sheet_name}:**\n"
+            f"📈 Всего приходов: {total_income} AZN\n"
+            f"📉 Всего расходов: {total_expense} AZN\n"
+            f"💰 Баланс за месяц: {balance_str} AZN\n\n"
+            f"*Список транзакций:*\n"
         )
+
+        return header + ("\n".join(lines) if lines else "❌ Нет транзакций по выбранному фильтру.")
     except gspread.exceptions.WorksheetNotFound:
         return None
     except Exception:
