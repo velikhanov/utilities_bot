@@ -2,8 +2,14 @@ import os
 import json
 from enum import Enum
 from dataclasses import dataclass
+from datetime import timezone, timedelta
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+# --- Global Constants ---
+MAX_MESSAGE_LENGTH = 4000
+BAKU_TZ = timezone(timedelta(hours=4))
+# ------------------------
 
 # --- Spreadsheet Structure Constants ---
 COL_TYPE = "type"

@@ -1,15 +1,13 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 from aiogram import F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from bot.constants import STATISTICS_TYPE_KEYBOARD, STATISTICS_FILTER_KEYBOARD
+from bot.constants import STATISTICS_TYPE_KEYBOARD, STATISTICS_FILTER_KEYBOARD, BAKU_TZ
 from bot.handlers.base import BaseHandler
 from bot.db import get_month_stats_summary
 from bot.states.statistics import StatisticsState
-
-BAKU_TZ = timezone(timedelta(hours=4))
 
 
 class StatsHandler(BaseHandler):
@@ -24,6 +22,7 @@ class StatsHandler(BaseHandler):
     async def show_stats_menu(self, message: Message):
         if not await self._check_user_access(message):
             return
+
         await message.answer("Выберите месяц для статистики:", reply_markup=STATISTICS_TYPE_KEYBOARD)
 
     async def _ask_for_filter(self, message: Message, state: FSMContext, sheet_name: str):
@@ -34,6 +33,7 @@ class StatsHandler(BaseHandler):
     async def stats_current(self, message: Message, state: FSMContext):
         if not await self._check_user_access(message):
             return
+
         now = datetime.now(BAKU_TZ)
         sheet_name = f"{now.month:02d}-{now.year}"
         await self._ask_for_filter(message, state, sheet_name)
@@ -41,6 +41,7 @@ class StatsHandler(BaseHandler):
     async def stats_previous(self, message: Message, state: FSMContext):
         if not await self._check_user_access(message):
             return
+
         now = datetime.now(BAKU_TZ)
         prev_month = now.month - 1 if now.month > 1 else 12
         prev_year = now.year if now.month > 1 else now.year - 1
@@ -50,6 +51,7 @@ class StatsHandler(BaseHandler):
     async def enter_custom_month(self, message: Message, state: FSMContext):
         if not await self._check_user_access(message):
             return
+
         await state.set_state(StatisticsState.waiting_for_month)
         await message.answer("Введите месяц и год в формате `MM-YYYY` (например: 09-2025):")
 
@@ -78,10 +80,10 @@ class StatsHandler(BaseHandler):
         sheet_name = data.get("sheet_name")
 
         stats = get_month_stats_summary(sheet_name, filter_type)
-        if not stats:
-            await message.answer(f"❌ Лист за {sheet_name} не найден.")
+        if stats:
+            await self._send_long_message(message, stats, parse_mode="Markdown")
         else:
-            await message.answer(stats, parse_mode="Markdown")
+            await message.answer(f"❌ Лист за {sheet_name} не найден.")
 
         await state.clear()
         await self._show_role_keyboard(message)
