@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -11,6 +11,7 @@ from bot.constants import (
     NEW_SHEET_ROWS, NEW_SHEET_COLS
 )
 
+BAKU_TZ = timezone(timedelta(hours=4))
 
 config = BotConfig.from_env()
 _client = None
@@ -45,7 +46,7 @@ def get_spreadsheet():
 def get_monthly_sheet():
     """Cache and return the current month's worksheet"""
     global _current_sheet, _current_sheet_name, _spreadsheet
-    month_name = datetime.now().strftime("%m-%Y")
+    month_name = datetime.now(BAKU_TZ).strftime("%m-%Y")
 
     if _current_sheet is None or _current_sheet_name != month_name:
         try:
@@ -69,7 +70,7 @@ def get_monthly_sheet():
 
 
 def get_records_from_previous_month() -> int:
-    now = datetime.now()
+    now = datetime.now(BAKU_TZ)
     year, month = now.year, now.month
 
     if month == 1:
@@ -150,7 +151,7 @@ def add_transaction(amount, transaction_type, description=None) -> int:
         amount,
         total_formula,
         description,
-        datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        datetime.now(BAKU_TZ).strftime("%d.%m.%Y %H:%M:%S")
     ], value_input_option="USER_ENTERED")
 
     return prev_total + amount
