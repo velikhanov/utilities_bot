@@ -39,6 +39,24 @@ class BaseHandler(ABC):
 
         return True
 
+    async def _parse_amount(self, message: Message) -> int | None:
+        """Parse a positive whole-number amount, answering the user on error.
+
+        Amounts are whole AZN only (no qəpik/coins), so decimals are rejected
+        rather than silently rounded. Returns None if the input is invalid.
+        """
+        try:
+            amount = int(message.text.strip())
+        except (ValueError, TypeError, AttributeError):
+            await message.answer("❌ Введите корректное целое число!")
+            return None
+
+        if amount <= 0:
+            await message.answer("❌ Введите положительное число!")
+            return None
+
+        return amount
+
     async def _delete_message_safely(self, message: Message):
         """Safely delete message with error handling"""
         try:

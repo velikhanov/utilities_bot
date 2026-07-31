@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
+from bot.constants import DEFAULT_FSM_DB_PATH
+
 
 load_dotenv()
 
@@ -16,6 +18,7 @@ class BotConfig:
     scopes: list[str]
     webhook_url: str = None
     webhook_secret: str = None
+    fsm_db_path: str = None
 
     @classmethod
     def from_env(cls):
@@ -26,6 +29,7 @@ class BotConfig:
             sheet_name=os.getenv("SHEET_NAME"),
             webhook_url=os.getenv("WEBHOOK_URL"),
             webhook_secret=os.getenv("WEBHOOK_SECRET"),
+            fsm_db_path=os.getenv("FSM_DB_PATH", DEFAULT_FSM_DB_PATH),
             scopes=[
                 "https://www.googleapis.com/auth/spreadsheets",
                 "https://www.googleapis.com/auth/drive"

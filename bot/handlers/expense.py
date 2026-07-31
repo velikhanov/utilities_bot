@@ -24,17 +24,11 @@ class ExpenseHandler(BaseHandler):
             return
 
         await state.set_state(ExpenseTransactionState.waiting_for_amount)
-        await state.update_data(transaction_type=TransactionType.EXPENSE)
         await message.answer("Введите сумму расхода:", reply_markup=TRANSACTION_IN_PROGRESS_KEYBORD)
 
     async def process_amount(self, message: Message, state: FSMContext):
-        try:
-            amount = int(message.text.replace(",", "."))
-            if amount <= 0:
-                await message.answer("❌ Введите положительное число!")
-                return
-        except ValueError:
-            await message.answer("❌ Введите корректное число!")
+        amount = await self._parse_amount(message)
+        if amount is None:
             return
 
         if get_total() < amount:
@@ -53,7 +47,7 @@ class ExpenseHandler(BaseHandler):
 
         await state.clear()
 
-        total = add_transaction(amount, data["transaction_type"], description)
+        total = add_transaction(amount, TransactionType.EXPENSE, description)
 
         await message.answer(f"💸 Расход на сумму {amount} AZN успешно добавлен!\n✏️ Описание: {description}")
         await message.answer(f"💰 Общая сумма в казне: {total} AZN")

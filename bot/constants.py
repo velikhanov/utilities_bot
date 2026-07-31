@@ -9,6 +9,11 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # --- Global Constants ---
 MAX_MESSAGE_LENGTH = 4000
 BAKU_TZ = timezone(timedelta(hours=4))
+
+# Project root, used to resolve on-disk paths independently of the process
+# working directory (PythonAnywhere may launch the WSGI app from elsewhere).
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_FSM_DB_PATH = os.path.join(BASE_DIR, "database.sqlite3")
 # ------------------------
 
 # --- Spreadsheet Structure Constants ---

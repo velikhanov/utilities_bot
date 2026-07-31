@@ -18,23 +18,16 @@ class IncomeHandler(BaseHandler):
             return
 
         await state.set_state(IncomeTransactionState.waiting_for_amount)
-        await state.update_data(transaction_type=TransactionType.INCOME)
         await message.answer("Введите сумму прихода:", reply_markup=TRANSACTION_IN_PROGRESS_KEYBORD)
 
     async def process_amount(self, message: Message, state: FSMContext):
-        try:
-            amount = int(message.text.replace(",", "."))
-            if amount <= 0:
-                await message.answer("❌ Введите положительное число!")
-                return
-        except ValueError:
-            await message.answer("❌ Введите корректное число!")
+        amount = await self._parse_amount(message)
+        if amount is None:
             return
 
-        data = await state.get_data()
         await state.clear()
 
-        total = add_transaction(amount, data["transaction_type"])
+        total = add_transaction(amount, TransactionType.INCOME)
 
         await message.answer(f"💵 Приход на сумму {amount} AZN успешно добавлен!")
         await message.answer(f"💰 Общая сумма в казне: {total} AZN")
